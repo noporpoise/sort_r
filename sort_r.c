@@ -2,6 +2,21 @@
 #include <stdio.h>
 #include <search.h>
 
+#ifdef QSORT_WITH_NESTED_FUNCTIONS
+
+void sort_r(void *base, size_t nel, size_t width,
+            int (*compar)(const void *a1, const void *a2, void *aarg), void *arg)
+{
+  int nested_cmp(const void *a, const void *b)
+  {
+    return compar(a, b, arg);
+  }
+
+  qsort(base, nel, width, nested_cmp);
+}
+
+#else
+
 struct sort_r_data
 {
   void *arg;
@@ -40,6 +55,7 @@ void sort_r(void *base, size_t nel, size_t width,
   #endif
 }
 
+#endif
 
 /* Example */
 
