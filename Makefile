@@ -10,8 +10,8 @@ else
 	CFLAGS=-Wall -Wextra -pedantic
 endif
 
-sort_r: sort_r.c
-	$(CC) $(CFLAGS) -o sort_r sort_r.c
+sort_r: example.c sort_r.c sort_r.h
+	$(CC) $(CFLAGS) -o sort_r example.c sort_r.c
 
 clean:
 	rm -rf sort_r

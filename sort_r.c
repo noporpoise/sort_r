@@ -1,10 +1,5 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <search.h>
 
-/* sort_r function to be exported */
-void sort_r(void *base, size_t nel, size_t width,
-            int (*compar)(const void *a1, const void *a2, void *aarg), void *arg);
+#include "sort_r.h"
 
 #ifdef QSORT_WITH_NESTED_FUNCTIONS
 
@@ -59,32 +54,4 @@ void sort_r(void *base, size_t nel, size_t width,
   #endif
 }
 
-#endif
-
-/* Example */
-
-/* comparison function to sort an array of int, inverting a given region
-   `arg` should be of type int[2], with the elements
-   representing the start and end of the region to invert (inclusive) */
-int sort_r_cmp(const void *aa, const void *bb, void *arg)
-{
-  const int *a = aa, *b = bb, *p = arg;
-  int cmp = *a - *b;
-  int inv_start = p[0], inv_end = p[1];
-  char norm = (*a < inv_start || *a > inv_end || *b < inv_start || *b > inv_end);
-  return norm ? cmp : -cmp;
-}
-
-int main()
-{
-  int i;
-  /* sort 1..19, 30..20, 30..100 */
-  int arr[18] = {1, 5, 28, 4, 3, 2, 10, 20, 18, 25, 21, 29, 34, 35, 14, 100, 27, 19};
-  /* Region to invert: 20-30 (inclusive) */
-  int p[] = {20, 30};
-  sort_r(arr, 18, sizeof(int), sort_r_cmp, p);
-
-  for(i = 0; i < 18; i++) printf(" %i", arr[i]);
-  printf("\n");
-  return 0;
-}
+#endif /* !QSORT_WITH_NESTED_FUNCTIONS */
