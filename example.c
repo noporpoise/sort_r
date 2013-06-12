@@ -26,6 +26,8 @@ int main()
   int p[] = {20, 30};
   sort_r(arr, 18, sizeof(int), sort_r_cmp, p);
 
+  /* printf(" glibc: %i.%i\n", __GLIBC__, __GLIBC_MINOR__); */
+
   for(i = 0; i < 18; i++) printf(" %i", arr[i]);
   printf("\n");
 
