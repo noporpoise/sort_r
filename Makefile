@@ -1,3 +1,4 @@
+# Isaac Turner 18 Nov 2013 Public Domain
 CC=gcc
 
 ifeq ($(shell uname),Darwin)
@@ -10,10 +11,10 @@ else
 	CFLAGS=-Wall -Wextra -pedantic
 endif
 
-sort_r: example.c sort_r.c sort_r.h
-	$(CC) $(CFLAGS) -o sort_r example.c sort_r.c
+example_sort: example.c sort_r.c sort_r.h
+	$(CC) $(CFLAGS) -o example_sort example.c sort_r.c
 
 clean:
-	rm -rf sort_r
+	rm -rf example_sort sort_r
 
 .PHONY: clean
