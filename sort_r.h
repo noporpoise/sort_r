@@ -79,8 +79,10 @@ static void sort_r(void *base, size_t nel, size_t width,
 
   #elif (defined _WIN32 || defined _WIN64 || defined __WINDOWS__)
 
-    struct sort_r_data tmp = {arg, compar};
-    qsort_s(*base, nel, width, &sort_r_arg_swap, &tmp);
+    struct sort_r_data tmp;
+    tmp.arg = arg;
+    tmp.compar = compar;
+    qsort_s(base, nel, width, &sort_r_arg_swap, &tmp);
 
   #else
     #error Cannot detect operating system
