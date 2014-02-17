@@ -1,0 +1,10 @@
+# Control file for continuous integration testing at http://travis-ci.org/
+
+language: c
+compiler:
+  - clang
+  - gcc
+
+script:
+- make NESTED_QSORT=1 && ./example_sort && make clean
+- make && ./example_sort && make clean
