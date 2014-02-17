@@ -11,9 +11,9 @@ Parameters:
   compar is the comparison function
   arg is a pointer to be passed to the comparison function
 
-static void sort_r(void *base, size_t nel, size_t width,
-                   int (*compar)(const void *a1, const void *a2, void *aarg),
-                   void *arg);
+void sort_r(void *base, size_t nel, size_t width,
+            int (*compar)(const void *a1, const void *a2, void *aarg),
+            void *arg);
 */
 
 #if defined(__MINGW32__) || defined(__OpenBSD__) || defined(AMIGA) || \
@@ -23,9 +23,9 @@ static void sort_r(void *base, size_t nel, size_t width,
 
 #ifdef QSORT_WITH_NESTED_FUNCTIONS
 
-static void sort_r(void *base, size_t nel, size_t width,
-                   int (*compar)(const void *a1, const void *a2, void *aarg),
-                   void *arg)
+static inline void sort_r(void *base, size_t nel, size_t width,
+                          int (*compar)(const void *a1, const void *a2, void *aarg),
+                          void *arg)
 {
   int nested_cmp(const void *a, const void *b)
   {
@@ -52,7 +52,7 @@ struct sort_r_data
   int (*compar)(const void *a1, const void *a2, void *aarg);
 };
 
-static int sort_r_arg_swap(void *s, const void *aa, const void *bb)
+static inline int sort_r_arg_swap(void *s, const void *aa, const void *bb)
 {
   struct sort_r_data *ss = (struct sort_r_data*)s;
   return (ss->compar)(aa, bb, ss->arg);
@@ -60,9 +60,9 @@ static int sort_r_arg_swap(void *s, const void *aa, const void *bb)
 
 #endif
 
-static void sort_r(void *base, size_t nel, size_t width,
-                   int (*compar)(const void *a1, const void *a2, void *aarg),
-                   void *arg)
+static inline void sort_r(void *base, size_t nel, size_t width,
+                          int (*compar)(const void *a1, const void *a2, void *aarg),
+                          void *arg)
 {
   #if (defined _GNU_SOURCE || defined __GNU__ || defined __linux__)
 
