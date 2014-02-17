@@ -6,6 +6,8 @@ Portable qsort_r / qsort_s
 Discussion here: http://stackoverflow.com/questions/4300896/how-portable-is-the-re-entrant-qsort-r-function-compared-to-qsort  
 License: Public Domain - use as you wish, no warranty
 
+[![Build Status](https://travis-ci.org/noporpoise/sort_r.png?branch=master)](https://travis-ci.org/noporpoise/sort_r)
+
 About
 -----
 
