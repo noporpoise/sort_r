@@ -1,12 +1,12 @@
 # Isaac Turner 18 Nov 2013 Public Domain
-CC=gcc
+CC ?= gcc
 
 ifeq ($(shell uname),Darwin)
 	MACFLAGS=-fnested-functions
 endif
 
 ifdef NESTED_QSORT
-	CFLAGS=-Wall -Wextra $(MACFLAGS) -DQSORT_WITH_NESTED_FUNCTIONS=1
+	CFLAGS=-Wall -Wextra $(MACFLAGS) -DNESTED_QSORT=1
 else
 	CFLAGS=-Wall -Wextra -pedantic
 endif

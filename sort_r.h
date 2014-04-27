@@ -16,12 +16,17 @@ void sort_r(void *base, size_t nel, size_t width,
             void *arg);
 */
 
-#if defined(__MINGW32__) || defined(__OpenBSD__) || defined(AMIGA) || \
-    defined(__gnu_hurd__) || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8)
-  #define QSORT_WITH_NESTED_FUNCTIONS 1
+#if (defined NESTED_QSORT && NESTED_QSORT == 0)
+  #undef NESTED_QSORT
+#elif (!defined(NESTED_QSORT) && \
+       (defined(__MINGW32__) || defined(__OpenBSD__) || defined(AMIGA) || \
+        defined(__gnu_hurd__) || \
+        (defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ < 8)))
+  /* operating systems without qsort_r/qsort_s perhaps? */
+  #define NESTED_QSORT 1
 #endif
 
-#ifdef QSORT_WITH_NESTED_FUNCTIONS
+#if defined NESTED_QSORT
 
 static inline void sort_r(void *base, size_t nel, size_t width,
                           int (*compar)(const void *a1, const void *a2, void *aarg),
@@ -37,7 +42,9 @@ static inline void sort_r(void *base, size_t nel, size_t width,
 
 #else
 
-#if (defined _GNU_SOURCE || defined __GNU__ || defined __linux__)
+/* Declare structs and functions */
+
+#if (defined_GNU_SOURCE || defined__GNU__ || defined__linux__)
 
 typedef int(* __compar_d_fn_t)(const void *, const void *, void *);
 extern void qsort_r (void *__base, size_t __nmemb, size_t __size,
@@ -59,6 +66,8 @@ static inline int sort_r_arg_swap(void *s, const void *aa, const void *bb)
 }
 
 #endif
+
+/* non-nested implementation */
 
 static inline void sort_r(void *base, size_t nel, size_t width,
                           int (*compar)(const void *a1, const void *a2, void *aarg),
@@ -89,4 +98,4 @@ static inline void sort_r(void *base, size_t nel, size_t width,
   #endif
 }
 
-#endif /* !QSORT_WITH_NESTED_FUNCTIONS */
+#endif /* !NESTED_QSORT */
