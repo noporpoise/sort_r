@@ -1,20 +1,16 @@
 # Isaac Turner 18 Nov 2013 Public Domain
 CC ?= gcc
 
-ifeq ($(shell uname),Darwin)
-	MACFLAGS=-fnested-functions
-endif
+CFLAGS=-Wall -Wextra -pedantic -Wundef
 
-ifdef NESTED_QSORT
-	CFLAGS=-Wall -Wextra $(MACFLAGS) -DNESTED_QSORT=1
-else
-	CFLAGS=-Wall -Wextra -pedantic
+ifndef NESTED_QSORT
+	NESTED_QSORT=0
 endif
 
 all: example_sort
 
 example_sort: example.c sort_r.h
-	$(CC) $(CFLAGS) -o example_sort example.c
+	$(CC) $(CFLAGS) -DNESTED_QSORT=$(NESTED_QSORT) -o example_sort example.c
 
 test: example_sort
 	./example_sort

@@ -44,7 +44,7 @@ static inline void sort_r(void *base, size_t nel, size_t width,
 
 /* Declare structs and functions */
 
-#if (defined_GNU_SOURCE || defined__GNU__ || defined__linux__)
+#if (defined _GNU_SOURCE || defined __GNU__ || defined __linux__)
 
 typedef int(* __compar_d_fn_t)(const void *, const void *, void *);
 extern void qsort_r (void *__base, size_t __nmemb, size_t __size,
