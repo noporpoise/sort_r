@@ -49,7 +49,7 @@ static inline void sort_r(void *base, size_t nel, size_t width,
 typedef int(* __compar_d_fn_t)(const void *, const void *, void *);
 extern void qsort_r (void *__base, size_t __nmemb, size_t __size,
                      __compar_d_fn_t __compar, void *__arg)
-  __nonnull ((1, 4));
+  __attribute__((nonnull (1, 4)));
 
 #else /* Not GNU linux */
 
