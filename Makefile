@@ -1,7 +1,7 @@
 # Isaac Turner 18 Nov 2013 Public Domain
 CC ?= gcc
 
-CFLAGS=-Wall -Wextra -pedantic -Wundef
+CFLAGS=-Wall -Wextra -pedantic -Wundef -std=c99
 
 ifndef NESTED_QSORT
 	NESTED_QSORT=0
