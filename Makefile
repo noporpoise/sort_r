@@ -1,5 +1,7 @@
 # Isaac Turner 18 Nov 2013 Public Domain
-CC ?= gcc
+ifndef CC
+	CC=gcc
+endif
 
 CFLAGS=-Wall -Wextra -pedantic -Wundef -std=c99
 
