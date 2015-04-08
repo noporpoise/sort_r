@@ -5,14 +5,14 @@ endif
 
 CFLAGS=-Wall -Wextra -pedantic -Wundef -std=c99
 
-ifndef NESTED_QSORT
-	NESTED_QSORT=0
+ifdef NESTED_QSORT
+	ARGS=-DNESTED_QSORT=$(NESTED_QSORT)
 endif
 
 all: example_sort
 
 example_sort: example.c sort_r.h
-	$(CC) $(CFLAGS) -DNESTED_QSORT=$(NESTED_QSORT) -o example_sort example.c
+	$(CC) $(CFLAGS) $(ARGS) -o example_sort example.c
 
 test: example_sort
 	./example_sort
