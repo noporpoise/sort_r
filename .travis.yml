@@ -2,6 +2,8 @@
 
 language: c
 
+sudo: false
+
 script:
 - make CC=clang NESTED_QSORT=0 && ./example_sort && make clean
 - make CC=gcc NESTED_QSORT=0 && ./example_sort && make clean

@@ -178,7 +178,7 @@ static inline void sort_r_simple(void *base, size_t nel, size_t w,
       tmp.compar = compar;
       qsort_r(base, nel, width, &tmp, sort_r_arg_swap);
 
-    #elif _SORT_R_WINDOWS
+    #elif defined _SORT_R_WINDOWS
 
       struct sort_r_data tmp;
       tmp.arg = arg;
