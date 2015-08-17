@@ -3,6 +3,7 @@
 #define SORT_R_H_
 
 #include <stdlib.h>
+#include <string.h>
 
 /*
 sort_r function to be exported.
@@ -32,7 +33,7 @@ void sort_r(void *base, size_t nel, size_t width,
 #elif (defined _WIN32 || defined _WIN64 || defined __WINDOWS__)
 #  define _SORT_R_WINDOWS
 #else
-#  error Cannot detect operating system
+  /* Using our own recursive quicksort */
 #endif
 
 #if (defined NESTED_QSORT && NESTED_QSORT == 0)
@@ -42,6 +43,69 @@ void sort_r(void *base, size_t nel, size_t width,
 /* no qsort_r in glibc before 2.8, need to use nested qsort */
 #  define NESTED_QSORT
 #endif
+
+/* swap a, b iff a>b */
+static inline int sort_r_cmpswap(char *restrict a, char *restrict b, size_t w,
+                                 int (*compar)(const void *_a, const void *_b, void *_arg),
+                                 void *arg)
+{
+  size_t i;
+  char tmp;
+  if(compar(a, b, arg) > 0) {
+    for(i = 0; i < w; i++) { tmp = a[i]; a[i] = b[i]; b[i] = tmp; }
+    return 1;
+  }
+  return 0;
+}
+
+/* Implement recursive quicksort ourselves */
+static inline void sort_r_simple(void *base, size_t nel, size_t w,
+                                 int (*compar)(const void *_a, const void *_b, void *_arg),
+                                 void *arg)
+{
+  char *b = (void*)base;
+  if(nel < 2) return;
+  else if(nel == 2) {
+    sort_r_cmpswap(b, b+w, w, compar, arg);
+  }
+  else if(nel == 3) {
+    sort_r_cmpswap(b, b+w, w, compar, arg);
+    if(sort_r_cmpswap(b+w, b+w+w, w, compar, arg)) {
+      sort_r_cmpswap(b, b+w, w, compar, arg);
+    }
+  }
+  else
+  {
+    // nel > 3
+    // Take last element as pivot
+    char pivot[w];
+    memcpy(pivot, b+(nel-1)*w, w);
+    size_t l = 0, r = nel-1;
+
+    while(l < r) {
+      for(; l < r; l++) {
+        if(compar(b+l*w, pivot, arg) > 0) {
+          memcpy(b+r*w, b+l*w, w);
+          r--;
+          break;
+        }
+      }
+      for(; r > l; r--) {
+        if(compar(b+r*w, pivot, arg) < 0) {
+          memcpy(b+l*w, b+r*w, w);
+          l++;
+          break;
+        }
+      }
+    }
+
+    // Put in pivot
+    memcpy(b+l*w, pivot, w);
+
+    sort_r_simple(b, l, w, compar, arg);
+    sort_r_simple(b+(l+1)*w, nel-l-1, w, compar, arg);
+  }
+}
 
 
 #if defined NESTED_QSORT
@@ -96,7 +160,16 @@ void sort_r(void *base, size_t nel, size_t width,
   {
     #if defined _SORT_R_LINUX
 
-      qsort_r(base, nel, width, compar, arg);
+      #if defined __GLIBC__ && ((__GLIBC__ < 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8)))
+
+        /* no qsort_r in glibc before 2.8, need to use nested qsort */
+        sort_r_simple(base, nel, width, compar, arg);
+
+      #else
+
+        qsort_r(base, nel, width, compar, arg);
+
+      #endif
 
     #elif defined _SORT_R_BSD
 
@@ -105,12 +178,17 @@ void sort_r(void *base, size_t nel, size_t width,
       tmp.compar = compar;
       qsort_r(base, nel, width, &tmp, sort_r_arg_swap);
 
-    #else /* defined _SORT_R_WINDOWS */
+    #elif _SORT_R_WINDOWS
 
       struct sort_r_data tmp;
       tmp.arg = arg;
       tmp.compar = compar;
       qsort_s(base, nel, width, sort_r_arg_swap, &tmp);
+
+    #else
+
+      /* Fall back to our own quicksort implementation */
+      sort_r_simple(base, nel, width, compar, arg);
 
     #endif
   }
