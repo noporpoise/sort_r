@@ -6,6 +6,7 @@
 #include <string.h>
 
 /*
+
 sort_r function to be exported.
 
 Parameters:
@@ -18,6 +19,7 @@ Parameters:
 void sort_r(void *base, size_t nel, size_t width,
             int (*compar)(const void *_a, const void *_b, void *_arg),
             void *arg);
+
 */
 
 #if (defined __APPLE__ || defined __MACH__ || defined __DARWIN__ || \
@@ -33,7 +35,7 @@ void sort_r(void *base, size_t nel, size_t width,
 #elif (defined _WIN32 || defined _WIN64 || defined __WINDOWS__)
 #  define _SORT_R_WINDOWS
 #else
-  /* Using our own recursive quicksort */
+  /* Using our own recursive quicksort sort_r_simple() */
 #endif
 
 #if (defined NESTED_QSORT && NESTED_QSORT == 0)
@@ -46,7 +48,8 @@ void sort_r(void *base, size_t nel, size_t width,
 
 /* swap a, b iff a>b */
 static inline int sort_r_cmpswap(char *restrict a, char *restrict b, size_t w,
-                                 int (*compar)(const void *_a, const void *_b, void *_arg),
+                                 int (*compar)(const void *_a, const void *_b,
+                                               void *_arg),
                                  void *arg)
 {
   size_t i;
@@ -60,7 +63,8 @@ static inline int sort_r_cmpswap(char *restrict a, char *restrict b, size_t w,
 
 /* Implement recursive quicksort ourselves */
 static inline void sort_r_simple(void *base, size_t nel, size_t w,
-                                 int (*compar)(const void *_a, const void *_b, void *_arg),
+                                 int (*compar)(const void *_a, const void *_b,
+                                               void *_arg),
                                  void *arg)
 {
   char *b = (void*)base;
@@ -111,7 +115,8 @@ static inline void sort_r_simple(void *base, size_t nel, size_t w,
 #if defined NESTED_QSORT
 
   static inline void sort_r(void *base, size_t nel, size_t width,
-                            int (*compar)(const void *_a, const void *_b, void *aarg),
+                            int (*compar)(const void *_a, const void *_b,
+                                          void *aarg),
                             void *arg)
   {
     int nested_cmp(const void *a, const void *b)
@@ -160,7 +165,7 @@ static inline void sort_r_simple(void *base, size_t nel, size_t w,
   {
     #if defined _SORT_R_LINUX
 
-      #if defined __GLIBC__ && ((__GLIBC__ < 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8)))
+      #if defined __GLIBC__ && ((__GLIBC__ < 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8))
 
         /* no qsort_r in glibc before 2.8, need to use nested qsort */
         sort_r_simple(base, nel, width, compar, arg);
