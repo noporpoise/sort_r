@@ -40,10 +40,6 @@ void sort_r(void *base, size_t nel, size_t width,
 
 #if (defined NESTED_QSORT && NESTED_QSORT == 0)
 #  undef NESTED_QSORT
-#elif (!defined NESTED_QSORT && defined __GLIBC__ && \
-       ( (__GLIBC__ < 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8) ) )
-/* no qsort_r in glibc before 2.8, need to use nested qsort */
-#  define NESTED_QSORT
 #endif
 
 /* swap a, b iff a>b */
