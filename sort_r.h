@@ -49,54 +49,51 @@ static inline int sort_r_cmpswap(char *__restrict a, char *__restrict b, size_t 
                                                void *_arg),
                                  void *arg)
 {
-  size_t i;
-  char tmp;
+  char tmp, *end = a+w;
   if(compar(a, b, arg) > 0) {
-    for(i = 0; i < w; i++) { tmp = a[i]; a[i] = b[i]; b[i] = tmp; }
+    for(; a < end; a++, b++) { tmp = *a; *a = *b; *b = tmp; }
     return 1;
   }
   return 0;
 }
 
 /* Implement recursive quicksort ourselves */
+/* Note: quicksort is not stable, equivalent values may be swapped */
 static inline void sort_r_simple(void *base, size_t nel, size_t w,
                                  int (*compar)(const void *_a, const void *_b,
                                                void *_arg),
                                  void *arg)
 {
-  char *b = (void*)base;
-  if(nel < 2) return;
-  else if(nel == 2) {
-    sort_r_cmpswap(b, b+w, w, compar, arg);
-  }
-  else if(nel == 3) {
-    sort_r_cmpswap(b, b+w, w, compar, arg);
-    if(sort_r_cmpswap(b+w, b+w+w, w, compar, arg)) {
-      sort_r_cmpswap(b, b+w, w, compar, arg);
+  char *b = base, *end = b + nel*w;
+  if(nel < 7) {
+    /* Insertion sort for arbitrarily small inputs */
+    char *pi, *pj;
+    for(pi = b+w; pi < end; pi += w) {
+      for(pj = pi; pj > b && sort_r_cmpswap(pj-w,pj,w,compar,arg); pj -= w) {}
     }
   }
   else
   {
-    /* nel > 3; Take last element as pivot */
-    size_t l = 0, r = nel-1;
+    /* nel > 6; Quicksort: take last element as pivot */
+    char *pl = b, *pr = b+(nel-1)*w;
 
-    while(l < r) {
-      for(; l < r; l++) {
-        if(sort_r_cmpswap(b+l*w, b+r*w, w, compar, arg)) {
-          r--; /* pivot now at l */
+    while(pl < pr) {
+      for(; pl < pr; pl += w) {
+        if(sort_r_cmpswap(pl, pr, w, compar, arg)) {
+          pr -= w; /* pivot now at pl */
           break;
         }
       }
-      for(; r > l; r--) {
-        if(sort_r_cmpswap(b+l*w, b+r*w, w, compar, arg)) {
-          l++; /* pivot now at r */
+      for(; pl < pr; pr -= w) {
+        if(sort_r_cmpswap(pl, pr, w, compar, arg)) {
+          pl += w; /* pivot now at pr */
           break;
         }
       }
     }
 
-    sort_r_simple(b, l, w, compar, arg);
-    sort_r_simple(b+(l+1)*w, nel-l-1, w, compar, arg);
+    sort_r_simple(b, (pl-b)/w, w, compar, arg);
+    sort_r_simple(pl+w, (end-(pl+w))/w, w, compar, arg);
   }
 }
 
