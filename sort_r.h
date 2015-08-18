@@ -43,7 +43,8 @@ void sort_r(void *base, size_t nel, size_t width,
 #endif
 
 /* swap a, b iff a>b */
-static inline int sort_r_cmpswap(char *restrict a, char *restrict b, size_t w,
+/* __restrict is same as restrict but better support on old machines */
+static inline int sort_r_cmpswap(char *__restrict a, char *__restrict b, size_t w,
                                  int (*compar)(const void *_a, const void *_b,
                                                void *_arg),
                                  void *arg)
@@ -76,31 +77,23 @@ static inline void sort_r_simple(void *base, size_t nel, size_t w,
   }
   else
   {
-    // nel > 3
-    // Take last element as pivot
-    char pivot[w];
-    memcpy(pivot, b+(nel-1)*w, w);
+    /* nel > 3; Take last element as pivot */
     size_t l = 0, r = nel-1;
 
     while(l < r) {
       for(; l < r; l++) {
-        if(compar(b+l*w, pivot, arg) > 0) {
-          memcpy(b+r*w, b+l*w, w);
-          r--;
+        if(sort_r_cmpswap(b+l*w, b+r*w, w, compar, arg)) {
+          r--; /* pivot now at l */
           break;
         }
       }
       for(; r > l; r--) {
-        if(compar(b+r*w, pivot, arg) < 0) {
-          memcpy(b+l*w, b+r*w, w);
-          l++;
+        if(sort_r_cmpswap(b+l*w, b+r*w, w, compar, arg)) {
+          l++; /* pivot now at r */
           break;
         }
       }
     }
-
-    // Put in pivot
-    memcpy(b+l*w, pivot, w);
 
     sort_r_simple(b, l, w, compar, arg);
     sort_r_simple(b+(l+1)*w, nel-l-1, w, compar, arg);
