@@ -6,9 +6,13 @@ os:
 - linux
 - osx
 
+compiler:
+- clang
+- gcc
+
 sudo: false
 
 script:
-- make CC=clang NESTED_QSORT=0 && ./example_sort && make clean
-- make CC=gcc NESTED_QSORT=0 && ./example_sort && make clean
-- make CC=gcc NESTED_QSORT=1 && ./example_sort && make clean
+- make && ./example_sort && make clean
+- make NESTED_QSORT=0 && ./example_sort && make clean
+- [ "$TRAVIS_OS_NAME" == "osx" && "$CC" == "clang" ] || make NESTED_QSORT=1 && ./example_sort && make clean
