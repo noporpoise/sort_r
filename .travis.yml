@@ -12,7 +12,4 @@ compiler:
 
 sudo: false
 
-script:
-- make && ./example_sort && make clean
-- make NESTED_QSORT=0 && ./example_sort && make clean
-- [ "$TRAVIS_OS_NAME" == "osx" && "$CC" == "clang" ] || make NESTED_QSORT=1 && ./example_sort && make clean
+script: ./travis.sh
