@@ -11,11 +11,23 @@ of the region to invert (inclusive).
 */
 static int sort_r_cmp(const void *aa, const void *bb, void *arg)
 {
-  const int *a = aa, *b = bb, *interval = arg;
-  int cmp = *a - *b;
-  int inv_start = interval[0], inv_end = interval[1];
-  char norm = (*a < inv_start || *a > inv_end || *b < inv_start || *b > inv_end);
+  const int a = *(const int*)aa, b = *(const int*)bb;
+  const int *bounds = (const int*)arg;
+  int cmp = (a < b ? -1 : a > b);
+  char norm = (a < bounds[0] || a > bounds[1] || b < bounds[0] || b > bounds[1]);
   return norm ? cmp : -cmp;
+}
+
+static int cmp_int(const void *aa, const void *bb, void *arg)
+{
+  (void)arg;
+  const int a = *(const int*)aa, b = *(const int*)bb;
+  return (a < b ? -1 : a > b);
+}
+
+static int cmpr_int(const void *aa, const void *bb, void *arg)
+{
+  return -cmp_int(aa,bb,arg);
 }
 
 static void print_list(const int *arr, size_t len)
@@ -44,8 +56,9 @@ int main()
 
   /* Region to invert: 20-30 (inclusive) */
   int interval[2] = {20, 30};
-  int res = 1;
+  int i, res = 1;
 
+  printf("Test 1:\n");
   printf("sort_r\n");
   memcpy(tmp, arr, LEN*sizeof(int));
   print_list(tmp, LEN);
@@ -59,6 +72,26 @@ int main()
   sort_r_simple(tmp, LEN, sizeof(int), sort_r_cmp, interval);
   print_list(tmp, LEN);
   res &= check_list(tmp, ans, LEN);
+
+  printf("Test 2:\n");
+  const int tlen = 100000;
+  int *tarray = malloc(tlen * sizeof(int));
+  for(i = 0; i < tlen; i++) tarray[i] = i;
+  /* sort integers */
+  sort_r(tarray, tlen, sizeof(tarray[0]), cmp_int, NULL);
+  for(i = 0; i < tlen && tarray[i] == i; i++) {}
+  res &= (i == tlen);
+  sort_r_simple(tarray, tlen, sizeof(tarray[0]), cmp_int, NULL);
+  for(i = 0; i < tlen && tarray[i] == i; i++) {}
+  res &= (i == tlen);
+  /* reverse sort integers */
+  sort_r(tarray, tlen, sizeof(tarray[0]), cmpr_int, NULL);
+  for(i = 0; i < tlen && tarray[i] == tlen-i-1; i++) {}
+  res &= (i == tlen);
+  sort_r_simple(tarray, tlen, sizeof(tarray[0]), cmpr_int, NULL);
+  for(i = 0; i < tlen && tarray[i] == tlen-i-1; i++) {}
+  res &= (i == tlen);
+  free(tarray);
 
   printf("return: %s\n", res ? "PASS" : "FAIL");
   return res ? EXIT_SUCCESS : EXIT_FAILURE;
