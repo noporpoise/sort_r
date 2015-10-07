@@ -77,21 +77,27 @@ static inline void sort_r_simple(void *base, size_t nel, size_t w,
     /* nel > 6; Quicksort */
 
     /* Use median of first, middle and last items as pivot */
+    char *x, *y, *xend, ch;
+    char *pl, *pr;
     char *last = b+w*(nel-1), *tmp;
-    char *l[3] = {b, b+w*(nel/2), last};
+    char *l[3];
+    l[0] = b;
+    l[1] = b+w*(nel/2);
+    l[2] = last;
+
     if(compar(l[0],l[1],arg) > 0) { tmp=l[0]; l[0]=l[1]; l[1]=tmp; }
     if(compar(l[1],l[2],arg) > 0) {
-      tmp=l[1]; l[1]=l[2]; l[2]=tmp; // swap(l[1],l[2])
+      tmp=l[1]; l[1]=l[2]; l[2]=tmp; /* swap(l[1],l[2]) */
       if(compar(l[0],l[1],arg) > 0) { tmp=l[0]; l[0]=l[1]; l[1]=tmp; }
     }
 
-    // swap l[id], l[2] to put pivot as last element
-    char *x, *y, *xend, ch;
+    /* swap l[id], l[2] to put pivot as last element */
     for(x = l[1], y = last, xend = x+w; x<xend; x++, y++) {
       ch = *x; *x = *y; *y = ch;
     }
 
-    char *pl = b, *pr = last;
+    pl = b;
+    pr = last;
 
     while(pl < pr) {
       for(; pl < pr; pl += w) {

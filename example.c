@@ -20,8 +20,8 @@ static int sort_r_cmp(const void *aa, const void *bb, void *arg)
 
 static int cmp_int(const void *aa, const void *bb, void *arg)
 {
+  int a = *(const int*)aa, b = *(const int*)bb;
   (void)arg;
-  const int a = *(const int*)aa, b = *(const int*)bb;
   return (a < b ? -1 : a > b);
 }
 
@@ -57,6 +57,8 @@ int main()
   /* Region to invert: 20-30 (inclusive) */
   int interval[2] = {20, 30};
   int i, res = 1;
+  const int tlen = 100000;
+  int *tarray = NULL;
 
   printf("Test 1:\n");
   printf("sort_r\n");
@@ -74,8 +76,7 @@ int main()
   res &= check_list(tmp, ans, LEN);
 
   printf("Test 2:\n");
-  const int tlen = 100000;
-  int *tarray = malloc(tlen * sizeof(int));
+  tarray = malloc(tlen * sizeof(int));
   for(i = 0; i < tlen; i++) tarray[i] = i;
   /* sort integers */
   sort_r(tarray, tlen, sizeof(tarray[0]), cmp_int, NULL);
