@@ -1,6 +1,6 @@
 {
   "name": "sort_r",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "repo": "noporpoise/sort_r",
   "description": "Portable qsort_r / qsort_s",
   "keywords": ["portable", "qsort", "qsort_s", "qsort_r"],
