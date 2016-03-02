@@ -29,11 +29,14 @@ void sort_r(void *base, size_t nel, size_t width,
      defined __DragonFly__ || \
      defined AMIGA)
 #  define _SORT_R_BSD
+#  define _SORT_R_INLINE inline
 #elif (defined _GNU_SOURCE || defined __gnu_hurd__ || defined __GNU__ || \
        defined __linux__ || defined __MINGW32__ || defined __GLIBC__)
 #  define _SORT_R_LINUX
+#  define _SORT_R_INLINE inline
 #elif (defined _WIN32 || defined _WIN64 || defined __WINDOWS__)
 #  define _SORT_R_WINDOWS
+#  define _SORT_R_INLINE __inline
 #else
   /* Using our own recursive quicksort sort_r_simple() */
 #endif
@@ -44,10 +47,10 @@ void sort_r(void *base, size_t nel, size_t width,
 
 /* swap a, b iff a>b */
 /* __restrict is same as restrict but better support on old machines */
-static inline int sort_r_cmpswap(char *__restrict a, char *__restrict b, size_t w,
-                                 int (*compar)(const void *_a, const void *_b,
-                                               void *_arg),
-                                 void *arg)
+static _SORT_R_INLINE int sort_r_cmpswap(char *__restrict a, char *__restrict b, size_t w,
+                                         int (*compar)(const void *_a, const void *_b,
+                                                       void *_arg),
+                                         void *arg)
 {
   char tmp, *end = a+w;
   if(compar(a, b, arg) > 0) {
@@ -59,12 +62,12 @@ static inline int sort_r_cmpswap(char *__restrict a, char *__restrict b, size_t 
 
 /* Implement recursive quicksort ourselves */
 /* Note: quicksort is not stable, equivalent values may be swapped */
-static inline void sort_r_simple(void *base, size_t nel, size_t w,
-                                 int (*compar)(const void *_a, const void *_b,
-                                               void *_arg),
-                                 void *arg)
+static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
+                                         int (*compar)(const void *_a, const void *_b,
+                                                       void *_arg),
+                                         void *arg)
 {
-  char *b = base, *end = b + nel*w;
+  char *b = (char *)base, *end = b + nel*w;
   if(nel < 7) {
     /* Insertion sort for arbitrarily small inputs */
     char *pi, *pj;
@@ -122,10 +125,10 @@ static inline void sort_r_simple(void *base, size_t nel, size_t w,
 
 #if defined NESTED_QSORT
 
-  static inline void sort_r(void *base, size_t nel, size_t width,
-                            int (*compar)(const void *_a, const void *_b,
-                                          void *aarg),
-                            void *arg)
+  static _SORT_R_INLINE void sort_r(void *base, size_t nel, size_t width,
+                                    int (*compar)(const void *_a, const void *_b,
+                                                  void *aarg),
+                                    void *arg)
   {
     int nested_cmp(const void *a, const void *b)
     {
@@ -138,7 +141,7 @@ static inline void sort_r_simple(void *base, size_t nel, size_t w,
 #else /* !NESTED_QSORT */
 
   /* Declare structs and functions */
-  #if defined _SORT_R_BSD
+  #if defined _SORT_R_BSD || defined _SORT_R_WINDOWS
 
     /* BSD requires argument swap */
     extern void qsort_r(void *base, size_t nel, size_t width, void *thunk,
@@ -150,7 +153,7 @@ static inline void sort_r_simple(void *base, size_t nel, size_t w,
       int (*compar)(const void *_a, const void *_b, void *_arg);
     };
 
-    static inline int sort_r_arg_swap(void *s, const void *a, const void *b)
+    static _SORT_R_INLINE int sort_r_arg_swap(void *s, const void *a, const void *b)
     {
       struct sort_r_data *ss = (struct sort_r_data*)s;
       return (ss->compar)(a, b, ss->arg);
@@ -167,9 +170,9 @@ static inline void sort_r_simple(void *base, size_t nel, size_t w,
 
   /* implementation */
 
-  static inline void sort_r(void *base, size_t nel, size_t width,
-                            int (*compar)(const void *_a, const void *_b, void *_arg),
-                            void *arg)
+  static _SORT_R_INLINE void sort_r(void *base, size_t nel, size_t width,
+                                    int (*compar)(const void *_a, const void *_b, void *_arg),
+                                    void *arg)
   {
     #if defined _SORT_R_LINUX
 
