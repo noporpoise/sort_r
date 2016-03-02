@@ -141,11 +141,18 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
 #else /* !NESTED_QSORT */
 
   /* Declare structs and functions */
-  #if defined _SORT_R_BSD || defined _SORT_R_WINDOWS
 
-    /* BSD requires argument swap */
+  #if defined _SORT_R_BSD
+
+    /* Ensure qsort_r is defined */
     extern void qsort_r(void *base, size_t nel, size_t width, void *thunk,
                         int (*compar)(void *_thunk, const void *_a, const void *_b));
+
+  #endif
+
+  #if defined _SORT_R_BSD || defined _SORT_R_WINDOWS
+
+    /* BSD (qsort_r), Windows (qsort_s) require argument swap */
 
     struct sort_r_data
     {
@@ -159,7 +166,9 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
       return (ss->compar)(a, b, ss->arg);
     }
 
-  #elif defined _SORT_R_LINUX
+  #endif
+
+  #if defined _SORT_R_LINUX
 
     typedef int(* __compar_d_fn_t)(const void *, const void *, void *);
     extern void qsort_r(void *base, size_t nel, size_t width,
