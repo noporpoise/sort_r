@@ -23,11 +23,7 @@ void sort_r(void *base, size_t nel, size_t width,
 */
 
 #if (defined __APPLE__ || defined __MACH__ || defined __DARWIN__ || \
-     defined __FreeBSD__ || defined __BSD__ || defined __bsdi__ || \
-     defined OpenBSD3_1 || defined OpenBSD3_9 || defined __OpenBSD__ || \
-     defined __NetBSD__ || \
-     defined __DragonFly__ || \
-     defined AMIGA)
+     defined __FreeBSD__ || defined __DragonFly__)
 #  define _SORT_R_BSD
 #  define _SORT_R_INLINE inline
 #elif (defined _GNU_SOURCE || defined __gnu_hurd__ || defined __GNU__ || \
@@ -220,6 +216,7 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
 
 #endif /* !NESTED_QSORT */
 
+#undef _SORT_R_INLINE
 #undef _SORT_R_WINDOWS
 #undef _SORT_R_LINUX
 #undef _SORT_R_BSD
