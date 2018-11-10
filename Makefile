@@ -9,13 +9,14 @@ ifdef NESTED_QSORT
 	ARGS=-DNESTED_QSORT=$(NESTED_QSORT)
 endif
 
-all: example_sort
+all: test
 
-example_sort: example.c sort_r.h
-	$(CC) $(CFLAGS) $(ARGS) -o example_sort example.c
-
-test: example_sort
+test: example_sort run_tests
 	./example_sort
+	./run_tests
+
+%: %.c sort_r.h
+	$(CC) $(CFLAGS) $(ARGS) -o $@ $<
 
 clean:
 	rm -rf example_sort

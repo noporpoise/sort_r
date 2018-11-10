@@ -103,22 +103,18 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
     if(l[1] != last) { sort_r_swap(l[1], last, w); }
 
     pl = b;
-    pr = last;
+    pr = last-w;
 
-    while(pl < pr) {
-      for(; pl < pr; pl += w) {
-        if(sort_r_cmpswap(pl, pr, w, compar, arg)) {
-          pr -= w; /* pivot now at pl */
-          break;
-        }
-      }
-      for(; pl < pr; pr -= w) {
-        if(sort_r_cmpswap(pl, pr, w, compar, arg)) {
-          pl += w; /* pivot now at pr */
-          break;
-        }
-      }
+    while(1) {
+      while(pl < pr && compar(pl, last, arg) <= 0) { pl += w; }
+      while(pl < pr && compar(pr, last, arg) >= 0) { pr -= w; }
+      if(pl == pr) { break; }
+      sort_r_swap(pl, pr, w);
     }
+
+    /* pl == pr */
+    if(compar(pl, last, arg) >= 0) { sort_r_swap(pl, last, w); }
+    else if(pl+w < last) { sort_r_swap(pl+w, last, w); }
 
     sort_r_simple(b, (pl-b)/w, w, compar, arg);
     sort_r_simple(pl+w, (end-(pl+w))/w, w, compar, arg);
