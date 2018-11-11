@@ -101,23 +101,28 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
 
     /* swap mid value (l[1]), and last element to put pivot as last element */
     if(l[1] != last) { sort_r_swap(l[1], last, w); }
+    char *pivot = last;
 
     pl = b;
     pr = last-w;
 
     while(1) {
-      while(pl < pr && compar(pl, last, arg) <= 0) { pl += w; }
-      while(pl < pr && compar(pr, last, arg) >= 0) { pr -= w; }
+      /* Find a pair to be swapped */
+      while(pl < pr && compar(pl, pivot, arg) <= 0) { pl += w; }
+      while(pl < pr && compar(pr, pivot, arg) >= 0) { pr -= w; }
       if(pl == pr) { break; }
-      sort_r_swap(pl, pr, w);
+      sort_r_swap(pl, pr, w); /* swap pair */
+      pl += w;
+      pr -= w;
     }
 
     /* pl == pr */
-    if(compar(pl, last, arg) >= 0) { sort_r_swap(pl, last, w); }
-    else if(pl+w < last) { sort_r_swap(pl+w, last, w); }
+    /* Find position to swap pivot into  */
+    char *mid = compar(pl, pivot, arg) >= 0 ? pl : pl + w;
+    if(pivot != mid) { sort_r_swap(mid, pivot, w); }
 
-    sort_r_simple(b, (pl-b)/w, w, compar, arg);
-    sort_r_simple(pl+w, (end-(pl+w))/w, w, compar, arg);
+    sort_r_simple(b, (mid-b)/w, w, compar, arg);
+    sort_r_simple(mid+w, (end-(mid+w))/w, w, compar, arg);
   }
 }
 
