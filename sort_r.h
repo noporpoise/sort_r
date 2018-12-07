@@ -94,7 +94,7 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
   {
     /* nel > 6; Quicksort */
 
-    /* Use median of first, middle and last items as pivot */
+    /* Use median of second, middle and second-last items as pivot */
     char *pl, *pr;
     char *last = b+w*(nel-1), *tmp;
     char *l[3];
