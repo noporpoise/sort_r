@@ -42,25 +42,18 @@ void sort_r(void *base, size_t nel, size_t width,
 #  undef NESTED_QSORT
 #endif
 
-/* swap a and b */
-/* a and b must not be equal! */
-static _SORT_R_INLINE void sort_r_swap(char *__restrict a, char *__restrict b,
-                                       size_t w)
-{
-  char tmp, *end = a+w;
-  for(; a < end; a++, b++) { tmp = *a; *a = *b; *b = tmp; }
-}
-
 /* swap a, b iff a>b */
-/* a and b must not be equal! */
 /* __restrict is same as restrict but better support on old machines */
-static _SORT_R_INLINE int sort_r_cmpswap(char *__restrict a, char *__restrict b, size_t w,
-                                         int (*compar)(const void *_a, const void *_b,
+static _SORT_R_INLINE int sort_r_cmpswap(char *__restrict a,
+                                         char *__restrict b, size_t w,
+                                         int (*compar)(const void *_a,
+                                                       const void *_b,
                                                        void *_arg),
                                          void *arg)
 {
+  char tmp, *end = a+w;
   if(compar(a, b, arg) > 0) {
-    sort_r_swap(a, b, w);
+    for(; a < end; a++, b++) { tmp = *a; *a = *b; *b = tmp; }
     return 1;
   }
   return 0;
@@ -69,7 +62,8 @@ static _SORT_R_INLINE int sort_r_cmpswap(char *__restrict a, char *__restrict b,
 /* Implement recursive quicksort ourselves */
 /* Note: quicksort is not stable, equivalent values may be swapped */
 static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
-                                         int (*compar)(const void *_a, const void *_b,
+                                         int (*compar)(const void *_a,
+                                                       const void *_b,
                                                        void *_arg),
                                          void *arg)
 {
@@ -86,6 +80,7 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
     /* nel > 6; Quicksort */
 
     /* Use median of first, middle and last items as pivot */
+    char *x, *y, *xend, ch;
     char *pl, *pr;
     char *last = b+w*(nel-1), *tmp;
     char *l[3];
@@ -99,30 +94,31 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
       if(compar(l[0],l[1],arg) > 0) { tmp=l[0]; l[0]=l[1]; l[1]=tmp; }
     }
 
-    /* swap mid value (l[1]), and last element to put pivot as last element */
-    if(l[1] != last) { sort_r_swap(l[1], last, w); }
-    char *pivot = last;
-
-    pl = b;
-    pr = last-w;
-
-    while(1) {
-      /* Find a pair to be swapped */
-      while(pl < pr && compar(pl, pivot, arg) <= 0) { pl += w; }
-      while(pl < pr && compar(pr, pivot, arg) >= 0) { pr -= w; }
-      if(pl >= pr) { break; }
-      sort_r_swap(pl, pr, w); /* swap pair */
-      pl += w;
-      pr -= w;
+    /* swap l[id], l[2] to put pivot as last element */
+    for(x = l[1], y = last, xend = x+w; x<xend; x++, y++) {
+      ch = *x; *x = *y; *y = ch;
     }
 
-    /* pl == pr */
-    /* Find position to swap pivot into  */
-    char *mid = compar(pl, pivot, arg) >= 0 ? pl : pl + w;
-    if(pivot != mid) { sort_r_swap(mid, pivot, w); }
+    pl = b;
+    pr = last;
 
-    sort_r_simple(b, (mid-b)/w, w, compar, arg);
-    sort_r_simple(mid+w, (end-(mid+w))/w, w, compar, arg);
+    while(pl < pr) {
+      for(; pl < pr; pl += w) {
+        if(sort_r_cmpswap(pl, pr, w, compar, arg)) {
+          pr -= w; /* pivot now at pl */
+          break;
+        }
+      }
+      for(; pl < pr; pr -= w) {
+        if(sort_r_cmpswap(pl, pr, w, compar, arg)) {
+          pl += w; /* pivot now at pr */
+          break;
+        }
+      }
+    }
+
+    sort_r_simple(b, (pl-b)/w, w, compar, arg);
+    sort_r_simple(pl+w, (end-(pl+w))/w, w, compar, arg);
   }
 }
 
