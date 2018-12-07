@@ -3,22 +3,22 @@ ifndef CC
 	CC=gcc
 endif
 
-CFLAGS=-Wall -Wextra -pedantic -Wundef
+CFLAGS=-Wall -Wextra -pedantic -Wundef -O3
 
 ifdef NESTED_QSORT
 	ARGS=-DNESTED_QSORT=$(NESTED_QSORT)
 endif
 
-all: test
+all: example run_tests
 
-test: example_sort run_tests
-	./example_sort
+test: example run_tests
+	./example
 	./run_tests
 
 %: %.c sort_r.h
 	$(CC) $(CFLAGS) $(ARGS) -o $@ $<
 
 clean:
-	rm -rf example_sort
+	rm -rf example run_tests
 
 .PHONY: all clean test
