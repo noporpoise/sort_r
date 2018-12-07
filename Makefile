@@ -3,7 +3,7 @@ ifndef CC
 	CC=gcc
 endif
 
-CFLAGS=-Wall -Wextra -pedantic -Wundef -std=c99 -O3
+CFLAGS=-Wall -Wextra -pedantic -Wundef -std=gnu99 -O3
 
 ifdef NESTED_QSORT
 	ARGS=-DNESTED_QSORT=$(NESTED_QSORT)
