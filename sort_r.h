@@ -44,8 +44,10 @@ void sort_r(void *base, size_t nel, size_t width,
 
 /* swap a, b iff a>b */
 /* __restrict is same as restrict but better support on old machines */
-static _SORT_R_INLINE int sort_r_cmpswap(char *__restrict a, char *__restrict b, size_t w,
-                                         int (*compar)(const void *_a, const void *_b,
+static _SORT_R_INLINE int sort_r_cmpswap(char *__restrict a,
+                                         char *__restrict b, size_t w,
+                                         int (*compar)(const void *_a,
+                                                       const void *_b,
                                                        void *_arg),
                                          void *arg)
 {
@@ -60,7 +62,8 @@ static _SORT_R_INLINE int sort_r_cmpswap(char *__restrict a, char *__restrict b,
 /* Implement recursive quicksort ourselves */
 /* Note: quicksort is not stable, equivalent values may be swapped */
 static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
-                                         int (*compar)(const void *_a, const void *_b,
+                                         int (*compar)(const void *_a,
+                                                       const void *_b,
                                                        void *_arg),
                                          void *arg)
 {
