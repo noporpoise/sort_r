@@ -53,7 +53,7 @@ double run_time_trial(const char *name, int *arr, int n) {
   struct timespec start, finish;
   cmp_counter = 0;
   clock_gettime(CLOCK_REALTIME, &start);
-  sort_r(arr, n, sizeof(int), cmp_ints, NULL);
+  sort_r_simple(arr, n, sizeof(int), cmp_ints, NULL);
   clock_gettime(CLOCK_REALTIME, &finish);
   check_sorted(arr, n, sizeof(int), cmp_ints, NULL);
 
