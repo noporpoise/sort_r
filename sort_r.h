@@ -42,7 +42,19 @@ void sort_r(void *base, size_t nel, size_t width,
 #  undef NESTED_QSORT
 #endif
 
+#define SORT_R_SWAP(a,b,tmp) ((tmp) = (a), (a) = (b), (b) = (tmp))
+
+/* swap a and b */
+/* a and b must not be equal! */
+static _SORT_R_INLINE void sort_r_swap(char *__restrict a, char *__restrict b,
+                                       size_t w)
+{
+  char tmp, *end = a+w;
+  for(; a < end; a++, b++) { SORT_R_SWAP(*a, *b, tmp); }
+}
+
 /* swap a, b iff a>b */
+/* a and b must not be equal! */
 /* __restrict is same as restrict but better support on old machines */
 static _SORT_R_INLINE int sort_r_cmpswap(char *__restrict a,
                                          char *__restrict b, size_t w,
@@ -51,9 +63,8 @@ static _SORT_R_INLINE int sort_r_cmpswap(char *__restrict a,
                                                        void *_arg),
                                          void *arg)
 {
-  char tmp, *end = a+w;
   if(compar(a, b, arg) > 0) {
-    for(; a < end; a++, b++) { tmp = *a; *a = *b; *b = tmp; }
+    sort_r_swap(a, b, w);
     return 1;
   }
   return 0;
@@ -68,6 +79,10 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
                                          void *arg)
 {
   char *b = (char *)base, *end = b + nel*w;
+
+  /* for(size_t i=0; i<nel; i++) {printf("%4i", *(int*)(b + i*sizeof(int)));}
+  printf("\n"); */
+
   if(nel < 7) {
     /* Insertion sort for arbitrarily small inputs */
     char *pi, *pj;
@@ -79,43 +94,49 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
   {
     /* nel > 6; Quicksort */
 
-    /* Use median of first, middle and last items as pivot */
-    char *x, *y, *xend, ch;
+    /* Use median of second, middle and second-last items as pivot */
     char *pl, *pr;
     char *last = b+w*(nel-1), *tmp;
     char *l[3];
-    l[0] = b;
+    l[0] = b + w;
     l[1] = b+w*(nel/2);
-    l[2] = last;
+    l[2] = last - w;
 
-    if(compar(l[0],l[1],arg) > 0) { tmp=l[0]; l[0]=l[1]; l[1]=tmp; }
+    /* printf("pivots: %i, %i, %i\n", *(int*)l[0], *(int*)l[1], *(int*)l[2]); */
+
+    if(compar(l[0],l[1],arg) > 0) { SORT_R_SWAP(l[0], l[1], tmp); }
     if(compar(l[1],l[2],arg) > 0) {
-      tmp=l[1]; l[1]=l[2]; l[2]=tmp; /* swap(l[1],l[2]) */
-      if(compar(l[0],l[1],arg) > 0) { tmp=l[0]; l[0]=l[1]; l[1]=tmp; }
+      SORT_R_SWAP(l[1], l[2], tmp);
+      if(compar(l[0],l[1],arg) > 0) { SORT_R_SWAP(l[0], l[1], tmp); }
     }
 
-    /* swap l[id], l[2] to put pivot as last element */
-    for(x = l[1], y = last, xend = x+w; x<xend; x++, y++) {
-      ch = *x; *x = *y; *y = ch;
-    }
+    /* swap mid value (l[1]), and last element to put pivot as last element */
+    if(l[1] != last) { sort_r_swap(l[1], last, w); }
+
+    /* printf("  mid: %i\n", *(int*)last); */
 
     pl = b;
     pr = last;
 
     while(pl < pr) {
       for(; pl < pr; pl += w) {
-        if(sort_r_cmpswap(pl, pr, w, compar, arg)) {
+        if(compar(pl, pr, arg) >= 0) {
+          sort_r_swap(pl, pr, w);
           pr -= w; /* pivot now at pl */
           break;
         }
       }
       for(; pl < pr; pr -= w) {
-        if(sort_r_cmpswap(pl, pr, w, compar, arg)) {
+        if(compar(pl, pr, arg) >= 0) {
+          sort_r_swap(pl, pr, w);
           pl += w; /* pivot now at pr */
           break;
         }
       }
     }
+
+    /*for(size_t i=0; i<nel; i++) {printf("%4i", *(int*)(b + i*sizeof(int)));}
+    printf("\n");*/
 
     sort_r_simple(b, (pl-b)/w, w, compar, arg);
     sort_r_simple(pl+w, (end-(pl+w))/w, w, compar, arg);
