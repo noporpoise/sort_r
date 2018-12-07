@@ -110,7 +110,7 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
       /* Find a pair to be swapped */
       while(pl < pr && compar(pl, pivot, arg) <= 0) { pl += w; }
       while(pl < pr && compar(pr, pivot, arg) >= 0) { pr -= w; }
-      if(pl == pr) { break; }
+      if(pl >= pr) { break; }
       sort_r_swap(pl, pr, w); /* swap pair */
       pl += w;
       pr -= w;
