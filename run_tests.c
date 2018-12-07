@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdbool.h>
+#include <math.h>
 #include "sort_r.h"
 
 
@@ -42,15 +43,14 @@ double get_timing(struct timespec start, struct timespec finish) {
 void report(const char *type, int nvals, double timing_sec,
             unsigned long n_cmps) {
   if(printing) {
-    printf("  %10s: n=%12i, %7.2f s, %12li comparisons\n",
-           type, nvals, timing_sec, n_cmps);
+    printf("  %10s: n=%12i, %7.2f s, %12li comparisons (%.1fX vs %.1fX)\n",
+           type, nvals, timing_sec, n_cmps, (double)n_cmps / nvals,
+           log2(nvals));
   }
 }
 
-double time_sorting_equal_vals(int *arr, int n) {
+double run_time_trial(const char *name, int *arr, int n) {
   struct timespec start, finish;
-
-  for(int i = 0; i < n; i++) { arr[i] = 10; }
   cmp_counter = 0;
   clock_gettime(CLOCK_REALTIME, &start);
   sort_r(arr, n, sizeof(int), cmp_ints, NULL);
@@ -58,59 +58,44 @@ double time_sorting_equal_vals(int *arr, int n) {
   check_sorted(arr, n, sizeof(int), cmp_ints, NULL);
 
   double timing_sec = get_timing(start, finish);
-  report("Equal", n, timing_sec, cmp_counter);
+  report(name, n, timing_sec, cmp_counter);
   return timing_sec;
+}
+
+double time_sorting_equal_vals(int *arr, int n) {
+  for(int i = 0; i < n; i++) { arr[i] = 10; }
+  return run_time_trial("Equal", arr, n);
 }
 
 double time_sorting_ascending_vals(int *arr, int n) {
-  struct timespec start, finish;
   for(int i = 0; i < n; i++) { arr[i] = i; }
-  cmp_counter = 0;
-  clock_gettime(CLOCK_REALTIME, &start);
-  sort_r(arr, n, sizeof(int), cmp_ints, NULL);
-  clock_gettime(CLOCK_REALTIME, &finish);
-  check_sorted(arr, n, sizeof(int), cmp_ints, NULL);
-
-  double timing_sec = get_timing(start, finish);
-  report("Ascending", n, timing_sec, cmp_counter);
-  return timing_sec;
+  return run_time_trial("Ascending", arr, n);
 }
 
 double time_sorting_descending_vals(int *arr, int n) {
-  struct timespec start, finish;
-
   for(int i = 0; i < n; i++) { arr[i] = -i; }
-  cmp_counter = 0;
-  clock_gettime(CLOCK_REALTIME, &start);
-  sort_r(arr, n, sizeof(int), cmp_ints, NULL);
-  clock_gettime(CLOCK_REALTIME, &finish);
-  check_sorted(arr, n, sizeof(int), cmp_ints, NULL);
-
-  double timing_sec = get_timing(start, finish);
-  report("Descending", n, timing_sec, cmp_counter);
-  return timing_sec;
+  return run_time_trial("Descending", arr, n);
 }
 
 double time_sorting_rand_vals(int *arr, int n) {
-  struct timespec start, finish;
-
   for(int i = 0; i < n; i++) { arr[i] = randarr[i]; }
-  cmp_counter = 0;
-  clock_gettime(CLOCK_REALTIME, &start);
-  sort_r(arr, n, sizeof(int), cmp_ints, NULL);
-  clock_gettime(CLOCK_REALTIME, &finish);
-  check_sorted(arr, n, sizeof(int), cmp_ints, NULL);
+  return run_time_trial("Random", arr, n);
+}
 
-  double timing_sec = get_timing(start, finish);
-  report("Random", n, timing_sec, cmp_counter);
-  return timing_sec;
+double time_sorting_mixed_vals(int *arr, int n) {
+  // Set a quarter of values to the same random value
+  for(int i = 0; i < n; i++) {
+    arr[i] = randarr[i] < n/4 ? randarr[n/2] : randarr[i];
+  }
+  return run_time_trial("Mixed", arr, n);
 }
 
 double run_tests(int *arr, int n) {
   return time_sorting_equal_vals(arr, n) +
          time_sorting_ascending_vals(arr, n) +
          time_sorting_descending_vals(arr, n) +
-         time_sorting_rand_vals(arr, n);
+         time_sorting_rand_vals(arr, n) +
+         time_sorting_mixed_vals(arr, n);
 }
 
 
