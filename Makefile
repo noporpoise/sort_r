@@ -4,6 +4,7 @@ ifndef CC
 endif
 
 CFLAGS=-Wall -Wextra -pedantic -Wundef -std=gnu99 -O3
+LIBS=-lm
 
 ifdef NESTED_QSORT
 	ARGS=-DNESTED_QSORT=$(NESTED_QSORT)
@@ -16,7 +17,7 @@ test: example run_tests
 	./run_tests
 
 %: %.c sort_r.h
-	$(CC) $(CFLAGS) $(ARGS) -o $@ $<
+	$(CC) $(CFLAGS) $(ARGS) -o $@ $< $(LIBS)
 
 clean:
 	rm -rf example run_tests
