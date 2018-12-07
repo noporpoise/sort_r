@@ -1,10 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdbool.h>
 #include "sort_r.h"
 
 
-static int cmp_ints(const void *aa, const void *bb, void *arg)
+bool printing = false;
+int *randarr = NULL;
+
+static inline int cmp_ints(const void *aa, const void *bb, void *arg)
 {
   (void)arg;
   const int a = *(const int*)aa, b = *(const int*)bb;
@@ -25,54 +29,96 @@ void check_sorted(const void *arr, size_t n, size_t w,
   }
 }
 
-void run_tests(int *arr, int *randarr, int n) {
-  /* All identical values */
+double get_timing(struct timespec start, struct timespec finish) {
+  long seconds = finish.tv_sec - start.tv_sec;
+  long ns = finish.tv_nsec - start.tv_nsec;
+  if(start.tv_nsec > finish.tv_nsec) { seconds--; ns += 1000000000; }
+  return (double)seconds + (double)ns/(double)1000000000;
+}
+
+double time_sorting_equal_vals(int *arr, int n) {
+  struct timespec start, finish;
+  clock_gettime(CLOCK_REALTIME, &start);
+
   for(int i = 0; i < n; i++) { arr[i] = 10; }
   sort_r(arr, n, sizeof(int), cmp_ints, NULL);
+  clock_gettime(CLOCK_REALTIME, &finish);
   check_sorted(arr, n, sizeof(int), cmp_ints, NULL);
 
-  /* Ascending values */
+  double timing_sec = get_timing(start, finish);
+  if(printing) { printf("  Equal vals n=%i... %.2f s\n", n, timing_sec); }
+  return timing_sec;
+}
+
+double time_sorting_ascending_vals(int *arr, int n) {
+  struct timespec start, finish;
+  clock_gettime(CLOCK_REALTIME, &start);
   for(int i = 0; i < n; i++) { arr[i] = i; }
   sort_r(arr, n, sizeof(int), cmp_ints, NULL);
+  clock_gettime(CLOCK_REALTIME, &finish);
   check_sorted(arr, n, sizeof(int), cmp_ints, NULL);
 
-  /* Descending values */
-  for(int i = 0; i < n; i++) { arr[i] = n-i; }
+  double timing_sec = get_timing(start, finish);
+  if(printing) { printf("  Ascending vals n=%i... %.2f s\n", n, timing_sec); }
+  return timing_sec;
+}
+
+double time_sorting_descending_vals(int *arr, int n) {
+  struct timespec start, finish;
+  clock_gettime(CLOCK_REALTIME, &start);
+
+  for(int i = 0; i < n; i++) { arr[i] = -i; }
   sort_r(arr, n, sizeof(int), cmp_ints, NULL);
+  clock_gettime(CLOCK_REALTIME, &finish);
   check_sorted(arr, n, sizeof(int), cmp_ints, NULL);
 
-  /* Random values */
-  memcpy(arr, randarr, sizeof(int)*n);
+  double timing_sec = get_timing(start, finish);
+  if(printing) { printf("  Descending vals n=%i... %.2f s\n", n, timing_sec); }
+  return timing_sec;
+}
+
+double time_sorting_rand_vals(int *arr, int n) {
+  struct timespec start, finish;
+  clock_gettime(CLOCK_REALTIME, &start);
+
+  for(int i = 0; i < n; i++) { arr[i] = randarr[i]; }
   sort_r(arr, n, sizeof(int), cmp_ints, NULL);
+  clock_gettime(CLOCK_REALTIME, &finish);
   check_sorted(arr, n, sizeof(int), cmp_ints, NULL);
+
+  double timing_sec = get_timing(start, finish);
+  if(printing) { printf("  Random vals n=%i... %.2f s\n", n, timing_sec); }
+  return timing_sec;
+}
+
+double run_tests(int *arr, int n) {
+  return time_sorting_equal_vals(arr, n) +
+         time_sorting_ascending_vals(arr, n) +
+         time_sorting_descending_vals(arr, n) +
+         time_sorting_rand_vals(arr, n);
 }
 
 
 int main()
 {
-  srand(time(NULL));
-
   int n = 100000000;
   int *arr = malloc(n*sizeof(n));
-  int *randarr = malloc(n*sizeof(n));
+
+  srand(time(NULL));
+  randarr = malloc(n*sizeof(n));
   for(int i = 0; i < n; i++) { randarr[i] = rand(); }
 
-  struct timespec start, finish;
-  clock_gettime(CLOCK_REALTIME, &start);
+  double run_secs = 0;
+  printing = false;
 
   for(int i = 0; i < 20; i++) {
-    run_tests(arr, randarr, i);
+    run_secs += run_tests(arr, i);
   }
 
   /* Run tests using the entire array */
-  run_tests(arr, randarr, n);
+  printing = true;
+  run_secs += run_tests(arr, n);
 
-  clock_gettime(CLOCK_REALTIME, &finish);
-
-  long seconds = finish.tv_sec - start.tv_sec;
-  long ns = finish.tv_nsec - start.tv_nsec;
-  if(start.tv_nsec > finish.tv_nsec) { seconds--; ns += 1000000000; }
-  double run_secs = (double)seconds + (double)ns/(double)1000000000;
   printf("Ran in %.2f s\n", run_secs);
 
   free(arr);
