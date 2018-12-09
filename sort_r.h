@@ -215,7 +215,8 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
 #if defined NESTED_QSORT
 
   static _SORT_R_INLINE void sort_r(void *base, size_t nel, size_t width,
-                                    int (*compar)(const void *_a, const void *_b,
+                                    int (*compar)(const void *_a,
+                                                  const void *_b,
                                                   void *aarg),
                                     void *arg)
   {
@@ -235,7 +236,8 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
 
     /* Ensure qsort_r is defined */
     extern void qsort_r(void *base, size_t nel, size_t width, void *thunk,
-                        int (*compar)(void *_thunk, const void *_a, const void *_b));
+                        int (*compar)(void *_thunk,
+                                      const void *_a, const void *_b));
 
   #endif
 
@@ -249,7 +251,8 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
       int (*compar)(const void *_a, const void *_b, void *_arg);
     };
 
-    static _SORT_R_INLINE int sort_r_arg_swap(void *s, const void *a, const void *b)
+    static _SORT_R_INLINE int sort_r_arg_swap(void *s,
+                                              const void *a, const void *b)
     {
       struct sort_r_data *ss = (struct sort_r_data*)s;
       return (ss->compar)(a, b, ss->arg);
@@ -269,7 +272,8 @@ static _SORT_R_INLINE void sort_r_simple(void *base, size_t nel, size_t w,
   /* implementation */
 
   static _SORT_R_INLINE void sort_r(void *base, size_t nel, size_t width,
-                                    int (*compar)(const void *_a, const void *_b, void *_arg),
+                                    int (*compar)(const void *_a,
+                                                  const void *_b, void *_arg),
                                     void *arg)
   {
     #if defined _SORT_R_LINUX
