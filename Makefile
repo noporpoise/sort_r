@@ -10,16 +10,16 @@ ifdef NESTED_QSORT
 	ARGS=-DNESTED_QSORT=$(NESTED_QSORT)
 endif
 
-all: example run_tests
+all: example benchmark
 
-test: example run_tests
+test: example benchmark
 	./example
-	./run_tests
+	./benchmark
 
 %: %.c sort_r.h
 	$(CC) $(CFLAGS) $(ARGS) -o $@ $< $(LIBS)
 
 clean:
-	rm -rf example run_tests
+	rm -rf example benchmark
 
 .PHONY: all clean test
