@@ -4,7 +4,13 @@ ifndef CC
 endif
 
 CFLAGS=-Wall -Wextra -pedantic -Wundef -std=gnu99 -O3
-LIBS=-lm
+LFLAGS=-lm
+
+# clock_gettime() requires -lrt to link on linux but not on mac
+OS := $(shell uname -s)
+ifeq ($(OS),Linux)
+	LFLAGS += -lrt
+endif
 
 ifdef NESTED_QSORT
 	ARGS=-DNESTED_QSORT=$(NESTED_QSORT)
@@ -17,7 +23,7 @@ test: example benchmark
 	./benchmark
 
 %: %.c sort_r.h
-	$(CC) $(CFLAGS) $(ARGS) -o $@ $< $(LIBS)
+	$(CC) $(CFLAGS) $(ARGS) -o $@ $< $(LFLAGS)
 
 clean:
 	rm -rf example benchmark
