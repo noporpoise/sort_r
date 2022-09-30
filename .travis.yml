@@ -1,4 +1,4 @@
-# Control file for continuous integration testing at http://travis-ci.org/
+# Control file for continuous integration testing at travis-ci.com
 
 language: c
 
@@ -6,10 +6,10 @@ os:
 - linux
 - osx
 
+dist: xenial
+
 compiler:
 - clang
 - gcc
-
-sudo: false
 
 script: ./travis.sh
