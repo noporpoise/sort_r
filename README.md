@@ -1,7 +1,7 @@
 sort_r
 ======
 
-Isaac Turner 2022
+Isaac Turner 2022  
 Portable qsort_r / qsort_s  
 Discussion here: http://stackoverflow.com/questions/4300896/how-portable-is-the-re-entrant-qsort-r-function-compared-to-qsort  
 License: Public Domain - use as you wish, no warranty
